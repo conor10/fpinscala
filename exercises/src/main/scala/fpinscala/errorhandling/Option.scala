@@ -68,7 +68,6 @@ object Option {
   def sequence[A](a: List[Option[A]]): Option[List[A]] = {
     def loop(a: List[Option[A]], acc: List[A]) : Option[List[A]] = {
       a match {
-//        case Some(x) :: Nil => Some(acc :+ x)
         case Some(x) :: xs => loop(xs, acc :+ x)
         case Nil => Some(acc)
         case _ => None
@@ -80,10 +79,6 @@ object Option {
   def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = {
     def loop(a: List[A], acc: List[B]): Option[List[B]] = {
       a match {
-//        case x :: Nil => f(x) match {
-//          case Some(x) => Some(acc :+ x)
-//          case _ => None
-//        }
         case x :: xs => f(x) match {
           case Some(x) => loop(xs, acc :+ x)
           case _ => None
