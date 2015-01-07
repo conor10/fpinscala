@@ -17,15 +17,72 @@ trait Stream[+A] {
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
-  def take(n: Int): Stream[A] = sys.error("todo")
+  def take(n: Int): Stream[A] = {
+    def loop(a: => Stream[A], acc: => Stream[A], count: Int): Stream[A] = {
+      if (count == n) acc
+      else a match {
+        case Empty => acc
+        case Cons(h, t) => cons(h(), loop(t(), acc, count+1))
+      }
+    }
+    loop(this, empty, 0)
+  }
 
-  def drop(n: Int): Stream[A] = sys.error("todo")
+  def drop(n: Int): Stream[A] = {
+    def loop(a: => Stream[A], count: Int): Stream[A] = {
+      if (count == n) a
+      else a match {
+        case Empty => a
+        case Cons(h, t) => loop(t(), count+1)
+      }
+    }
+    loop(this, 0)
+  }
 
-  def takeWhile(p: A => Boolean): Stream[A] = sys.error("todo")
+  def takeWhile(p: A => Boolean): Stream[A] = {
+    def loop(a: => Stream[A], acc: => Stream[A]): Stream[A] = {
+      a match {
+        case Empty => acc
+        case Cons(h, t) => if (p(h())) cons(h(), loop(t(), acc)) else acc
+      }
+    }
 
-  def forAll(p: A => Boolean): Boolean = sys.error("todo")
+    loop(this, empty)
+  }
+
+  def takeWhileFold(p: A => Boolean): Stream[A] =
+    foldRight(empty: Stream[A])((a, b) => if (p(a)) cons(a, b) else empty)
+
+  def forAll(p: A => Boolean): Boolean =
+    foldRight(true)((a, b) => p(a) && b)
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
+
+  def toList: List[A] = {
+    def loop(a: Stream[A], acc: List[A]): List[A] = a match {
+      case Cons(h, t) => loop(t(), acc :+ h())
+      case Empty => acc
+    }
+    loop(this, List())
+  }
+
+  def headOption: Option[A] =
+    foldRight(None: Option[A])((h, t) => Some(h))
+
+  def map[B](f: A => B): Stream[B] =
+    foldRight(empty[B])((h, t) => cons(f(h), t))
+
+  // Model answer provides type of [B], it's not clear why
+  def filter(p: A => Boolean): Stream[A] =
+    foldRight(empty[A])((h, t) => if (p(h)) cons(h, t) else t)
+
+  // non-strict in its argument hence B>:A
+  def append[B>:A](a: Stream[B]): Stream[B] =
+    foldRight(a)((h, t) => cons(h, t))
+
+  def flatMap[B](f: A => Stream[B]): Stream[B] =
+    foldRight(empty[B])((h, t) => f(h).append(t))
+
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
