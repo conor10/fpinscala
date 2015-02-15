@@ -11,6 +11,7 @@ import fpinscala.datastructures.List._
 class ListTest extends FunSuite {
 
   test("append") {
+    println(List(1, 2, 3, 4))
     assert(List(1, 2, 3, 4) === append(List(1, 2), List(3, 4)))
   }
 
@@ -27,11 +28,11 @@ class ListTest extends FunSuite {
   }
 
   test("dropWhile") {
-    assert(List(3, 4) === dropWhile(List(1, 2, 3, 4), (x: Int) => x > 2))
+    assert(List(3, 4) === dropWhile(List(1, 2, 3, 4), (x: Int) => x < 3))
   }
 
   test("length") {
-    assert(4 === length(List(1, 2, 3)))
+    assert(4 === length(List(1, 2, 3, 4)))
   }
 
   test("sum2L") {
@@ -43,11 +44,15 @@ class ListTest extends FunSuite {
   }
 
   test("lengthL") {
-    assert(4 === lengthL(List(1, 2, 3)))
+    assert(4 === lengthL(List(1, 2, 3, 4)))
   }
 
   test("reverse") {
     assert(List(4, 3, 2, 1) === reverse(List(1, 2, 3, 4)))
+  }
+
+  test("foldLeftWithFoldRight") {
+    assert(10 === foldLeftWithFoldRight(List(1, 2, 3, 4), 0)(_ + _))
   }
 
   test("foldAppend") {
@@ -60,7 +65,7 @@ class ListTest extends FunSuite {
 
   test("convert") {
     assert(List(1.0.toString, 2.0.toString, 3.0.toString)
-      === List(1.0, 2.0, 3.0))
+      === convert(List(1.0, 2.0, 3.0)))
   }
 
   test("map") {

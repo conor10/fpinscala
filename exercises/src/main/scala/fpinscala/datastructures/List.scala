@@ -53,8 +53,7 @@ object List { // `List` companion object. Contains functions for creating and wo
       case Cons(x, xs) => xs
     }
 
-  def setHead[A](l: List[A], h: A): List[A] =
-    Cons(h, tail(l))
+  def setHead[A](l: List[A], h: A): List[A] = Cons(h, l)
 
   def drop[A](l: List[A], n: Int): List[A] = {
     def loop(l: List[A], i: Int): List[A] =
@@ -112,6 +111,10 @@ object List { // `List` companion object. Contains functions for creating and wo
       }
 
     loop(l, Nil)
+  }
+
+  def foldLeftWithFoldRight[A,B](l: List[A], z: B)(f: (B, A) => B): B = {
+    foldRight(reverse(l), z)(((b, a) => f(a, b)) )
   }
 
   def foldAppend[A](a1: List[A], a2: List[A]): List[A] =
