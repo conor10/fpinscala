@@ -106,6 +106,10 @@ trait Stream[+A] {
     case _ => None
   }
 
+  // special case of `zip` - used in Gen.scala
+  def zip[B](s2: Stream[B]): Stream[(A,B)] =
+    zipWith(s2)((_,_))
+
   // TODO: Find out why this doesn't work - commenting out either of the two middle case statements gets rid of the compiler error
   // http://stackoverflow.com/questions/25585759/weird-type-mismatch-in-zipall-implementation-in-scala
 //  def zipAll[B](a2: Stream[B]): Stream[(Option[A],Option[B])] = unfold(this, a2)

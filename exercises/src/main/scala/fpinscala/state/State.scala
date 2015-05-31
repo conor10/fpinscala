@@ -42,6 +42,11 @@ object RNG {
     (n1 / (Int.MaxValue.toDouble+1), rng1)
   }
 
+  def boolean(rng: RNG): (Boolean, RNG) = {
+    val (n, rng1) = rng.nextInt
+    (n % 2 == 0, rng1)
+  }
+
   def intDouble(rng: RNG): ((Int,Double), RNG) = {
     val (i, rng1) = rng.nextInt
     val (d, rng2) = double(rng1)
@@ -139,4 +144,7 @@ object State {
   type Rand[A] = State[RNG, A]
   def simulateMachine(inputs: List[Input]): State[Machine, (Int, Int)] = ???
   def unit[S, A](a: A): State[S, A] = State(s => (a, s))
+
+  def sequence[S,A](sas: List[State[S, A]]): State[S, List[A]] =
+    sas.foldRight(unit[S, List[A]](List()))((s, a) => s.map2(a)(_ :: _))
 }
