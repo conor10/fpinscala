@@ -9,7 +9,7 @@ trait Stream[+A] {
       case _ => z
     }
 
-  def exists(p: A => Boolean): Boolean = 
+  def exists(p: A => Boolean): Boolean =
     foldRight(false)((a, b) => p(a) || b) // Here `b` is the unevaluated recursive step that folds the tail of the stream. If `p(a)` returns `true`, `b` will never be evaluated and the computation terminates early.
 
   @annotation.tailrec
@@ -158,7 +158,7 @@ object Stream {
   def empty[A]: Stream[A] = Empty
 
   def apply[A](as: A*): Stream[A] =
-    if (as.isEmpty) empty 
+    if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
 
   val ones: Stream[Int] = Stream.cons(1, ones)

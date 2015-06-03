@@ -1,9 +1,7 @@
-package datastructures
+package fpinscala.datastructures
 
 import org.scalatest.FunSuite
 
-import fpinscala.datastructures.Branch
-import fpinscala.datastructures.Leaf
 import fpinscala.datastructures.Tree._
 
 /**

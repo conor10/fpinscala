@@ -1,8 +1,7 @@
-package laziness
+package fpinscala.laziness
 
 import org.scalatest.FunSuite
 
-import fpinscala.laziness._
 import fpinscala.laziness.Stream._
 
 /**

@@ -1,8 +1,7 @@
-package datastructures
+package fpinscala.datastructures
 
 import org.scalatest.FunSuite
 
-import fpinscala.datastructures.List
 import fpinscala.datastructures.List._
 
 /**

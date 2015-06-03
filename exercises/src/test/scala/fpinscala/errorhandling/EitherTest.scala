@@ -1,8 +1,7 @@
-package errorhandling
+package fpinscala.errorhandling
 
 import org.scalatest.FunSuite
 
-import fpinscala.errorhandling._
 import fpinscala.errorhandling.Either._
 
 /**

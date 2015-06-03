@@ -1,9 +1,8 @@
-package testing
+package fpinscala.testing
 
 import fpinscala.state.RNG._
 import fpinscala.state.State
 import fpinscala.testing.Prop.{Passed, Falsified}
-import fpinscala.testing.{Prop, SimpleProp, Gen}
 import org.scalatest.FunSuite
 
 /**
@@ -50,15 +49,34 @@ class GenTest extends FunSuite {
     val valid = Prop((tc, rng) => Passed)
     val invalid = Prop((tc, rng) => Falsified("", 0))
 
-    assert(Passed === (valid && valid).run(0, Simple(1)))
-    assert(Falsified(" (LeftProp)", 0) === (invalid && valid).run(0, Simple(1)))
-    assert(Falsified(" (RightProp)", 0) === (valid && invalid).run(0, Simple(1)))
-    assert(Falsified(" (LeftProp)", 0) === (invalid && valid).run(0, Simple(1)))
+    assert(Passed === (valid && valid).run(1, 0, Simple(1)))
+    assert(Falsified(" (LeftProp)", 0) === (invalid && valid).run(1, 0, Simple(1)))
+    assert(Falsified(" (RightProp)", 0) === (valid && invalid).run(1, 0, Simple(1)))
+    assert(Falsified(" (LeftProp)", 0) === (invalid && valid).run(1, 0, Simple(1)))
 
-    assert(Passed === (valid || valid).run(0, Simple(1)))
-    assert(Passed === (invalid || valid).run(0, Simple(1)))
-    assert(Passed === (valid || invalid).run(0, Simple(1)))
-    assert(Falsified("", 0) === (invalid || invalid).run(0, Simple(1)))
+    assert(Passed === (valid || valid).run(1, 0, Simple(1)))
+    assert(Passed === (invalid || valid).run(1, 0, Simple(1)))
+    assert(Passed === (valid || invalid).run(1, 0, Simple(1)))
+    assert(Falsified("", 0) === (invalid || invalid).run(1, 0, Simple(1)))
   }
 
+  test("maxProp") {
+    Prop.run(Gen.maxProp)
+  }
+
+  test("sortedProp") {
+    Prop.run(Gen.sortedProp)
+  }
+
+  test("forkProp") {
+    Prop.run(Gen.forkProp)
+  }
+
+  test("takeWhileDropWhileProp") {
+    Prop.run(Gen.takeWhileDropWhileProp)
+  }
+
+  test("takeProp") {
+    Prop.run(Gen.takeProp)
+  }
 }

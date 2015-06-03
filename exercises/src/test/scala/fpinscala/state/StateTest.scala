@@ -1,6 +1,5 @@
-package state
+package fpinscala.state
 
-import fpinscala.state._
 import org.scalatest.FunSuite
 
 import fpinscala.state.RNG.Simple
