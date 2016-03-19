@@ -133,7 +133,11 @@ object SimpleStreamTransducers {
     /*
      * Exercise 5: Implement `|>`. Let the types guide your implementation.
      */
-    def |>[O2](p2: Process[O,O2]): Process[I,O2] = ???
+    def |>[O2](p2: Process[O,O2]): Process[I,O2] = p2 match {
+      case Halt() => Halt()
+      case Emit(h, t) => this
+      case Await(recv) =>
+    }
 
     /*
      * Feed `in` to this `Process`. Uses a tail recursive loop as long
@@ -194,10 +198,13 @@ object SimpleStreamTransducers {
     def filter(f: O => Boolean): Process[I,O] =
       this |> Process.filter(f)
 
+
+
     /*
      * Exercise 6: Implement `zipWithIndex`.
      */
     def zipWithIndex: Process[I,(O,Int)] = ???
+      // answer uses zip which hasn't been defined thus far in the text
 
     /* Add `p` to the fallback branch of this process */
     def orElse(p: Process[I,O]): Process[I,O] = this match {
@@ -223,7 +230,7 @@ object SimpleStreamTransducers {
 
     case class Halt[I,O]() extends Process[I,O]
 
-    def emit[I,O](head: O,
+     def emit[I,O](head: O,
                   tail: Process[I,O] = Halt[I,O]()): Process[I,O] =
       Emit(head, tail)
 
@@ -289,13 +296,26 @@ object SimpleStreamTransducers {
     /*
      * Exercise 1: Implement `take`, `drop`, `takeWhile`, and `dropWhile`.
      */
-    def take[I](n: Int): Process[I,I] = ???
+    def take[I](n: Int): Process[I,I] = {
+      def go(idx: Int): Process[I,I] =
+        await(x => if (idx < n) emit(x, go(idx + 1)) else Halt())
+      go(0)
+    }
 
-    def drop[I](n: Int): Process[I,I] = ???
+    def drop[I](n: Int): Process[I,I] = {
+      def go(idx: Int): Process[I, I] =
+        await(x => if (idx < n) go(idx + 1) else emit(x, go(idx + 1)))
+      go(0)
+    }
 
-    def takeWhile[I](f: I => Boolean): Process[I,I] = ???
+    def takeWhile[I](f: I => Boolean): Process[I,I] =
+      Await[I,I] {
+        case Some(i) if f(i) => emit(i, takeWhile(f))
+        case _ => Halt()
+      }
 
-    def dropWhile[I](f: I => Boolean): Process[I,I] = ???
+    def dropWhile[I](f: I => Boolean): Process[I,I] =
+      takeWhile(x => !f(x))
 
     /* The identity `Process`, just repeatedly echos its input. */
     def id[I]: Process[I,I] = lift(identity)
@@ -303,7 +323,12 @@ object SimpleStreamTransducers {
     /*
      * Exercise 2: Implement `count`.
      */
-    def count[I]: Process[I,Int] = ???
+    def count[I]: Process[I,Int] = {
+      def go(count: Int): Process[I,Int] =
+        await(d => emit(count + 1, go(count + 1)))
+      go(0)
+    }
+
 
     /* For comparison, here is an explicit recursive implementation. */
     def count2[I]: Process[I,Int] = {
@@ -315,7 +340,15 @@ object SimpleStreamTransducers {
     /*
      * Exercise 3: Implement `mean`.
      */
-    def mean: Process[Double,Double] = ???
+    def mean: Process[Double,Double] = {
+      def go(count: Double, sum: Double): Process[Double,Double] =
+        await(d => {
+          val t = sum + d
+          val c = count + 1
+          emit(t / c, go(c, t))
+        })
+      go(0.0, 0.0)
+    }
 
     def loop[S,I,O](z: S)(f: (I,S) => (O,S)): Process[I,O] =
       await((i: I) => f(i,z) match {
@@ -324,9 +357,9 @@ object SimpleStreamTransducers {
 
     /* Exercise 4: Implement `sum` and `count` in terms of `loop` */
 
-    def sum2: Process[Double,Double] = ???
+    def sum2: Process[Double,Double] = loop(0.0)( (i, s) => (i + s, i + s))
 
-    def count3[I]: Process[I,Int] = ???
+    def count3[I]: Process[I,Int] = loop(0)((i, s) => (s + 1, s + 1))
 
     /*
      * Exercise 7: Can you think of a generic combinator that would
@@ -347,13 +380,16 @@ object SimpleStreamTransducers {
      * See definition on `Process` above.
      */
 
+
     /*
      * Exercise 8: Implement `exists`
      *
      * We choose to emit all intermediate values, and not halt.
      * See `existsResult` below for a trimmed version.
      */
-    def exists[I](f: I => Boolean): Process[I,Boolean] = ???
+    def exists[I](f: I => Boolean): Process[I,Boolean] =
+      lift(f) |> loop(false)((i, s) => (f(i), s))
+
 
     /* Awaits then emits a single value, then halts. */
     def echo[I]: Process[I,I] = await(i => emit(i))
@@ -742,6 +778,9 @@ object GeneralizedStreamTransducers {
 
     /* Exercise 11: Implement `eval`, `eval_`, and use these to implement `lines`. */
     def eval[F[_],A](a: F[A]): Process[F,A] = ???
+//      await {
+//      case Some(x) => emit(a(x))
+//      }
 
     /* Evaluate the action purely for its effects. */
     def eval_[F[_],A,B](a: F[A]): Process[F,B] = ???
